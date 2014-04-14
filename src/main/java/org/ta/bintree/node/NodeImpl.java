@@ -6,7 +6,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.text.ParseException;
 import java.util.Iterator;
-import jdk.nashorn.internal.objects.NativeArray;
 
 /**
  *
@@ -67,8 +66,9 @@ public class NodeImpl implements Node {
 		
 		while (nodeIterator.hasNext()) {
 			output.write(nodeIterator.next().getName() + " ");
-			output.flush();
 		}
+		output.write("\n");
+		output.flush();
 	}	
 
 	private void parseNodeDescription(String descr) throws ParseException {
@@ -142,12 +142,12 @@ public class NodeImpl implements Node {
 
 class NodeIterator implements Iterator<Node>{
 
-	Node node;
+	private final Node node;
+	private boolean isNextTheLocalNode = true;
 	private Iterator<Node> leftIterator = null;
 	private Iterator<Node> rightIterator = null;
 	
 	NodeIterator(Node node) {
-		System.out.println("ITERATE: " + node.getName());
 		this.node = node;
 		if (node.getLeft() != null) {
 			 this.leftIterator = node.getLeft().widthIterator();
@@ -170,20 +170,36 @@ class NodeIterator implements Iterator<Node>{
 
 	@Override
 	public boolean hasNext() {
-		Iterator<Node> actIterator = getActIterator();
-		if (actIterator != null) {
-			return actIterator.hasNext();
+		if (isNextTheLocalNode) {
+			return true;
+		}
+		else {
+			Iterator<Node> actIterator = getActIterator();
+			if (actIterator != null) {
+				return actIterator.hasNext();
+			}
 		}
 		return false;
 	}
 
 	@Override
 	public Node next() {
-		Iterator<Node> actIterator = getActIterator();
-		if (actIterator != null) {
-			return actIterator.next();
+		if (isNextTheLocalNode) {
+			this.isNextTheLocalNode = false;
+			return this.node;
 		}
-		return null;
+		else {
+			Iterator<Node> actIterator = getActIterator();
+			if (actIterator != null) {
+				return actIterator.next();
+			}
+			return null;
+		}
+	}
+
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException("Remove is not supported."); 
 	}
 	
 }

@@ -32,7 +32,6 @@ public class BinTreeMain {
 			System.out.println(pe.getMessage());
 		}
 		
-		//System.out.println("   a b		g  \nh".replaceAll("\\s","."));
 	}
 	
 }
