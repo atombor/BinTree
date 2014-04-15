@@ -77,25 +77,30 @@ public class NodeImpl implements Node {
 			descr = descr.replaceAll("\\s","");
 			//Node Name
 			final int firstCommaIndex = descr.indexOf(",");
-			this.name = descr.substring(descr.indexOf("(")+1, firstCommaIndex);
-			System.out.println("Name:" + this.name);
+			try {
+				this.name = descr.substring(descr.indexOf("(")+1, firstCommaIndex);
+				System.out.println("Name:" + this.name);
 
-			//LEFT
-			String leftNodeDescr = parseLeftDescriptor(descr);
-			if (leftNodeDescr == null) {
-				System.out.println(this.name + " --- left Node is empty.");
+				//LEFT
+				String leftNodeDescr = parseLeftDescriptor(descr);
+				if (leftNodeDescr == null) {
+					System.out.println(this.name + " --- left Node is empty.");
+				}
+				else {
+					this.left = new NodeImpl(leftNodeDescr);
+				}
+
+				//RIGHT 
+				String rightNodeDescr = parseRightDescriptor(descr, this.name, leftNodeDescr);
+				if (rightNodeDescr == null) {
+					System.out.println(this.name + " --- right Node is empty.");
+				}
+				else {
+					this.right = new NodeImpl(rightNodeDescr);
+				}
 			}
-			else {
-				this.left = new NodeImpl(leftNodeDescr);
-			}
-			
-			//RIGHT 
-			String rightNodeDescr = parseRightDescriptor(descr, this.name, leftNodeDescr);
-			if (rightNodeDescr == null) {
-				System.out.println(this.name + " --- right Node is empty.");
-			}
-			else {
-				this.right = new NodeImpl(rightNodeDescr);
+			catch (StringIndexOutOfBoundsException e) {
+				throw new ParseException("Invalid description: " + descr, 0);
 			}
 			
 		} 
@@ -112,19 +117,47 @@ public class NodeImpl implements Node {
 		parseNodeDescription(description);
 	}
 
-	private static String parseLeftDescriptor(String descr) {
+	private static String parseLeftDescriptor(String descr) throws ParseException {
 		String leftNodeDescr = null;
-		int firstCommaIndex = descr.indexOf(",");
-		String restDescr = descr.substring(firstCommaIndex+1, descr.lastIndexOf(")"));
+		final int firstCommaIndex = descr.indexOf(",");
+		//String restDescr = descr.substring(firstCommaIndex+1, descr.lastIndexOf(")"));
 
-		final int leftBracketStart = restDescr.indexOf("(");
-		final int nextComma = restDescr.indexOf(",");
+		final int leftBracketStart = descr.indexOf("(", 1);
+		final int nextComma = descr.indexOf(",", firstCommaIndex+1);
 		if (nextComma < leftBracketStart || leftBracketStart < 0) {
 		}
 		else {
-			leftNodeDescr = restDescr.substring(leftBracketStart, restDescr.indexOf(")")+1);
+			leftNodeDescr = descr.substring(leftBracketStart, findClosingBracket(descr)+1);
 		}
 		return leftNodeDescr;
+	}
+	
+	private static int findClosingBracket(String descr) throws ParseException {
+		int closeIndex = 0;
+		int numberOfOpenings = 0;
+		int numberOfClosings = 0;
+		
+		//(rootName,(level1LeftName,(level2LeftName1,,),(level2RightName1,,)),(level1RightName2,(level2LeftName,,),))
+		char[] descrArr = descr.toCharArray();
+
+		int i = 1;
+		boolean beforeClosingBracket = true;
+		while (beforeClosingBracket && i < descrArr.length) {
+			char actChar = descrArr[i];
+			if (actChar == '(') {
+				numberOfOpenings++;
+			}
+			else if (actChar == ')') {
+				beforeClosingBracket = ++numberOfClosings != numberOfOpenings;
+				closeIndex = i;
+			}
+			i++;
+		}
+		if (numberOfOpenings != numberOfClosings) {
+			throw new ParseException("Error in node descriptor format: " + descr, 0);
+		}
+		
+		return closeIndex;
 	}
 	
 	private static String parseRightDescriptor(String descr, String name, String leftNodeDescr) {
