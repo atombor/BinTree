@@ -7,8 +7,9 @@ import java.text.ParseException;
 import java.util.Iterator;
 
 /**
- *
- * @author doki
+ * Node interface as a precondition of the application.
+ * 
+ * @author Tombor Attila
  */
 public interface Node {
 

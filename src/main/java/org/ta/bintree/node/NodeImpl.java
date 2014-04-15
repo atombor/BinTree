@@ -8,14 +8,22 @@ import java.text.ParseException;
 import java.util.Iterator;
 
 /**
- *
- * @author doki
+ * Implements the Node interface to parse text input, and build the binary tree,
+ * and writes the node names to a given output.
+ * 
+ * @author Tombor Attila
  */
 public class NodeImpl implements Node {
 
 	private String name;
 	private Node left;
 	private Node right;
+	private static final String COMMA = ",";
+	private static final String BRACKET_OPENING = "(";
+	private static final String BRACKET_CLOSING = ")";
+	private static final char BRACKET_OPENING_CHAR = BRACKET_OPENING.charAt(0);
+	private static final char BRACKET_CLOSING_CHAR =  BRACKET_CLOSING.charAt(0);
+	
 	
 	@Override
 	public String getName() {
@@ -71,29 +79,50 @@ public class NodeImpl implements Node {
 		output.flush();
 	}	
 
+	/**
+	 * Simple constructor to create the root element. The root node object need
+	 * to start the parser with its the load method.
+	 */
+	public NodeImpl() {
+		System.out.println("Root node created.");
+	}
+	
+	/**
+	 * Constructor for internal use of the class, to create child elements 
+	 * dynamically.
+	 * 
+	 * @param description part of the input string that represents one node
+	 * @throws ParseException 
+	 */
+	private NodeImpl(String description) throws ParseException {
+		System.out.println("New node with description: " + description);
+		parseNodeDescription(description);
+	}
+	
 	private void parseNodeDescription(String descr) throws ParseException {
 		if (descr != null && descr.length() > 4) {
-			//TODO: more syntax check
+			
 			descr = descr.replaceAll("\\s","");
-			//Node Name
-			final int firstCommaIndex = descr.indexOf(",");
+			
+			// Node Name
+			final int firstCommaIndex = descr.indexOf(COMMA);
 			try {
-				this.name = descr.substring(descr.indexOf("(")+1, firstCommaIndex);
-				System.out.println("Name:" + this.name);
+				this.name = descr.substring(descr.indexOf(BRACKET_OPENING)+1, firstCommaIndex);
+				System.out.println(" - name: " + this.name);
 
-				//LEFT
+				// left node
 				String leftNodeDescr = parseLeftDescriptor(descr);
 				if (leftNodeDescr == null) {
-					System.out.println(this.name + " --- left Node is empty.");
+					System.out.println(" - " + this.name + ": left Node is empty.");
 				}
 				else {
 					this.left = new NodeImpl(leftNodeDescr);
 				}
 
-				//RIGHT 
+				// right node
 				String rightNodeDescr = parseRightDescriptor(descr, this.name, leftNodeDescr);
 				if (rightNodeDescr == null) {
-					System.out.println(this.name + " --- right Node is empty.");
+					System.out.println(" - " + this.name + ": right Node is empty.");
 				}
 				else {
 					this.right = new NodeImpl(rightNodeDescr);
@@ -109,21 +138,12 @@ public class NodeImpl implements Node {
 		}
 	}
 
-	public NodeImpl() {
-	}
-	
-	private NodeImpl(String description) throws ParseException {
-		System.out.println(" - NEW NODE with description: " + description);
-		parseNodeDescription(description);
-	}
-
 	private static String parseLeftDescriptor(String descr) throws ParseException {
 		String leftNodeDescr = null;
-		final int firstCommaIndex = descr.indexOf(",");
-		//String restDescr = descr.substring(firstCommaIndex+1, descr.lastIndexOf(")"));
+		final int firstCommaIndex = descr.indexOf(COMMA);
 
-		final int leftBracketStart = descr.indexOf("(", 1);
-		final int nextComma = descr.indexOf(",", firstCommaIndex+1);
+		final int leftBracketStart = descr.indexOf(BRACKET_OPENING, 1);
+		final int nextComma = descr.indexOf(COMMA, firstCommaIndex+1);
 		if (nextComma < leftBracketStart || leftBracketStart < 0) {
 		}
 		else {
@@ -137,17 +157,16 @@ public class NodeImpl implements Node {
 		int numberOfOpenings = 0;
 		int numberOfClosings = 0;
 		
-		//(rootName,(level1LeftName,(level2LeftName1,,),(level2RightName1,,)),(level1RightName2,(level2LeftName,,),))
 		char[] descrArr = descr.toCharArray();
 
 		int i = 1;
 		boolean beforeClosingBracket = true;
 		while (beforeClosingBracket && i < descrArr.length) {
 			char actChar = descrArr[i];
-			if (actChar == '(') {
+			if (actChar == BRACKET_OPENING_CHAR) {
 				numberOfOpenings++;
 			}
-			else if (actChar == ')') {
+			else if (actChar == BRACKET_CLOSING_CHAR) {
 				beforeClosingBracket = ++numberOfClosings != numberOfOpenings;
 				closeIndex = i;
 			}
@@ -165,7 +184,8 @@ public class NodeImpl implements Node {
 
 		int rightDescrStart = name.length()+3;
 		rightDescrStart += (leftNodeDescr == null)? 0 : leftNodeDescr.length();
-		final int rightBracketEnd = descr.lastIndexOf(")");
+		final int rightBracketEnd = descr.lastIndexOf(BRACKET_CLOSING);
+		
 		if (rightBracketEnd > rightDescrStart) {
 			rightNodeDescr = descr.substring(rightDescrStart, rightBracketEnd);
 		}
@@ -173,6 +193,13 @@ public class NodeImpl implements Node {
 	}
 }
 
+/**
+ * Iterator that is able to go through the whole binary tree (if started from
+ * the root node).
+ * Next value is the actual node, than the left child node, finally the right ones.
+ * 
+ * @author Tombor Attila
+ */
 class NodeIterator implements Iterator<Node>{
 
 	private final Node node;
