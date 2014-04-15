@@ -8,8 +8,8 @@ import java.text.ParseException;
 import java.util.Iterator;
 
 /**
- * Implements the Node interface to parse text input, and build the binary tree,
- * and writes the node names to a given output.
+ * Implements the Node interface to parse text input, build the binary tree,
+ * and makes it possible to write the node names to a given output using an iterator.
  * 
  * @author Tombor Attila
  */
@@ -84,7 +84,7 @@ public class NodeImpl implements Node {
 	 * to start the parser with its the load method.
 	 */
 	public NodeImpl() {
-		System.out.println("Root node created.");
+		//System.out.println("Root node created.");
 	}
 	
 	/**
@@ -95,7 +95,7 @@ public class NodeImpl implements Node {
 	 * @throws ParseException 
 	 */
 	private NodeImpl(String description) throws ParseException {
-		System.out.println("New node with description: " + description);
+		//System.out.println("New node with description: " + description);
 		parseNodeDescription(description);
 	}
 	
@@ -108,12 +108,12 @@ public class NodeImpl implements Node {
 			final int firstCommaIndex = descr.indexOf(COMMA);
 			try {
 				this.name = descr.substring(descr.indexOf(BRACKET_OPENING)+1, firstCommaIndex);
-				System.out.println(" - name: " + this.name);
+				//System.out.println(" - name: " + this.name);
 
 				// left node
 				String leftNodeDescr = parseLeftDescriptor(descr);
 				if (leftNodeDescr == null) {
-					System.out.println(" - " + this.name + ": left Node is empty.");
+					//System.out.println(" - " + this.name + ": left Node is empty.");
 				}
 				else {
 					this.left = new NodeImpl(leftNodeDescr);
@@ -122,7 +122,7 @@ public class NodeImpl implements Node {
 				// right node
 				String rightNodeDescr = parseRightDescriptor(descr, this.name, leftNodeDescr);
 				if (rightNodeDescr == null) {
-					System.out.println(" - " + this.name + ": right Node is empty.");
+					//System.out.println(" - " + this.name + ": right Node is empty.");
 				}
 				else {
 					this.right = new NodeImpl(rightNodeDescr);

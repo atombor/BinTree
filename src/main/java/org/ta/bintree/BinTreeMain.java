@@ -7,8 +7,8 @@ import java.text.ParseException;
 import org.ta.bintree.node.NodeImpl;
 
 /**
- *  Asks input string from console, and gives the NodeImpl class to parse,
- *  and build the binary tree.
+ * Asks input string from the console, and gives it to the NodeImpl class
+ * to parse, and build the binary tree.
  * In the end it lists the node names, in the same order as they are in the input.
  * 
  * @author Tombor Attila
@@ -24,9 +24,7 @@ public class BinTreeMain {
 		try {
 			rootNode.load(new InputStreamReader(System.in));
 			
-			System.out.println("\n -- LOADED -- \n");
-			
-			System.out.println("Result of Node save:");
+			System.out.println("\nResult of Node save:");
 			rootNode.save(new OutputStreamWriter(System.out));
 		}
 		catch (IOException ioe) {
